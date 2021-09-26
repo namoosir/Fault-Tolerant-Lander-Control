@@ -159,8 +159,12 @@
   Standard C libraries
 */
 #include <math.h>
+#include<stdio.h>
 
 #include "Lander_Control.h"
+
+void Rotate_Right(double VXlim);
+void Rotate_Left(double VXlim);
 
 void Lander_Control(void)
 {
@@ -245,13 +249,15 @@ void Lander_Control(void)
  // effect, i.e. the rotation angle does not accumulate
  // for successive calls.
 
- if (Angle()>1&&Angle()<359)
+ 
+//all thrusters work
+if (MT_OK && RT_OK && LT_OK) {
+  if (Angle()>1&&Angle()<359)
  {
   if (Angle()>=180) Rotate(360-Angle());
   else Rotate(-Angle());
   return;
  }
-
  // Module is oriented properly, check for horizontal position
  // and set thrusters appropriately.
  if (Position_X()>PLAT_X)
@@ -284,6 +290,114 @@ void Lander_Control(void)
  // Safety_Override() to save us from crashing with the ground.
  if (Velocity_Y()<VYlim) Main_Thruster(1.0);
  else Main_Thruster(0);
+
+ //main thruster does not work
+} else if (!MT_OK && LT_OK && RT_OK) {
+  // if (Position_X()==PLAT_X) {
+  //   if (Velocity_Y()<VYlim) {
+  //     Left_Thruster(1.0);
+  //     Right_Thruster(1.0);
+  //   } else {
+  //     Left_Thruster(0);
+  //     Right_Thruster(0);
+  //   }
+  // } else if (Position_X()>PLAT_X){
+  //   double left_value_baseline = 0.5;
+  //   double right_value_baseline = 0.5;
+  //   Left_Thruster(left_value_baseline);
+  //   if (Velocity_X()>(-VXlim)) Right_Thruster((VXlim+fmin(0,Velocity_X()))/VXlim);
+  //   else {
+  //     Right_Thruster(right_value_baseline);
+  //     Left_Thruster(fabs(VXlim-Velocity_X()));
+  //   }
+  // } else {
+  //   double right_value_baseline = 0.5;
+  //   double left_value_baseline = 0.5;
+  //   Right_Thruster(right_value_baseline);
+  //   if (Velocity_X()<VXlim) Left_Thruster((VXlim-fmax(0,Velocity_X()))/VXlim);
+  //   else {
+  //     Left_Thruster(left_value_baseline);
+  //     Right_Thruster(fabs(VXlim-Velocity_X()));
+  //   }
+  // }
+
+  // if (Velocity_Y()<VYlim) {
+  //   Right_Thruster(1.0);
+  //   Left_Thruster(1.0);
+  // }
+  
+
+
+  //left thruster does not work
+} else if (!LT_OK && MT_OK && RT_OK) {
+
+  //right thruster does not work
+} else if (!RT_OK && MT_OK && LT_OK) {
+
+  //right and left thrusters don't work
+} else if (!RT_OK && !LT_OK && MT_OK) {
+    if (Position_X()==PLAT_X) {
+      if (Angle()>1&&Angle()<359)
+      {
+        if (Angle()>=180) Rotate(360-Angle());
+        else Rotate(-Angle());
+        return;
+      }
+      if (Velocity_Y()<VYlim) Main_Thruster(1.0);
+      else Main_Thruster(0);
+      
+    } else if (Position_X()>PLAT_X) {
+      Rotate_Right(VXlim);
+      if (Velocity_Y()<VYlim) Main_Thruster(1.0);
+      else Main_Thruster(0);
+
+    } else {
+      Rotate_Left(VXlim);
+      if (Velocity_Y()<VYlim) Main_Thruster(1.0);
+      else Main_Thruster(0);
+
+    }
+  //left and main thrusters don't work
+} else if (!LT_OK && !MT_OK && RT_OK) {
+
+  //right and main thrusters don't work
+} else if (!RT_OK && MT_OK && LT_OK) {
+
+  //none of the thrusters work
+} else {
+
+}
+
+}
+
+//rotate the ship right when left and right thrusters are not working
+void Rotate_Right(double VXlim) {
+  if (Angle()>0 && Angle()<344) {
+    if (Angle()<180) Rotate(-Angle()-15);
+    else Rotate(345-Angle());
+    return;
+  } else if (Angle()>346 && Angle()<360) {
+    Rotate(345-Angle());
+    return;
+  } else {
+    if (Velocity_X()<VXlim) Main_Thruster(1);
+    else Rotate_Left(VXlim);
+  }
+}
+
+//rotate the ship left when left and right thrusters are not working
+void Rotate_Left(double VXlim) {
+  if (Angle()>16 && Angle()<360) {
+    if (Angle()<180) Rotate(-Angle()+15);
+    else Rotate(375-Angle());
+    return;
+  } else if (Angle()>0 && Angle()<14) {
+    Rotate(15-Angle());
+    return;
+  } else {
+    if (Velocity_X()<VXlim) Main_Thruster(1);
+    else Rotate_Right(VXlim);
+  }
 }
 
 void Safety_Override(void)
