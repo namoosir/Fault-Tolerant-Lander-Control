@@ -439,7 +439,7 @@ void Safety_Override(void)
   not corresponding to the landing platform,
   carry out speed corrections using the thrusters
 **************************************************/
-
+ printf("in safety override\n");
  double DistLimit;
  double Vmag;
  double dmin;
@@ -481,25 +481,25 @@ void Safety_Override(void)
  // what is it?
  if (dmin<DistLimit*fmax(.25,fmin(fabs(Velocity_X())/5.0,1)))
  { // Too close to a surface in the horizontal direction
-  if (Angle()>1&&Angle()<359)
-  {
-   if (Angle()>=180) Rotate(360-Angle());
-   else Rotate(-Angle());
-   return;
-  }
-
-  //changed this...not sure if correct
+  printf("too close to surface in horizontal direction\n");
   if (LT_OK && RT_OK && MT_OK) {
-    if (Velocity_X()>0){
-    Right_Thruster(1.0);
-    Left_Thruster(0.0);
-    }
-    else
+    if (Angle()>1&&Angle()<359)
     {
-    Left_Thruster(1.0);
-    Right_Thruster(0.0);
+    if (Angle()>=180) Rotate(360-Angle());
+    else Rotate(-Angle());
+    return;
     }
+      if (Velocity_X()>0){
+      Right_Thruster(1.0);
+      Left_Thruster(0.0);
+      }
+      else
+      {
+      Left_Thruster(1.0);
+      Right_Thruster(0.0);
+      }
   } else if (!LT_OK && !RT_OK && MT_OK) {
+    printf("here\n");
     if (Velocity_X()>0){
       Rotate_Left();
     } else {
@@ -523,20 +523,33 @@ void Safety_Override(void)
   for (int i=14; i<22; i++)
    if (SONAR_DIST[i]>-1&&SONAR_DIST[i]<dmin) dmin=SONAR_DIST[i];
  }
- if (dmin<DistLimit)   // Too close to a surface in the horizontal direction
+ if (dmin<DistLimit)   // Too close to a surface in the vertical direction
  {
-  if (Angle()>1||Angle()>359)
-  {
-   if (Angle()>=180) Rotate(360-Angle());
-   else Rotate(-Angle());
-   return;
+   printf("too close to surface in vertical direction\n");
+   if (MT_OK && RT_OK && LT_OK) {
+    if (Angle()>1||Angle()>359)
+      {
+      if (Angle()>=180) Rotate(360-Angle());
+      else Rotate(-Angle());
+      return;
+      }
+      if (Velocity_Y()>2.0){
+      Main_Thruster(0.0);
+      }
+      else
+      {
+      Main_Thruster(1.0);
+      }
+    } else if (MT_OK && !RT_OK && !LT_OK) {
+      printf("hereV\n");
+      if (Velocity_Y()>2.0){
+      Main_Thruster(0.0);
+      }
+      else
+      {
+      Main_Thruster(1.0);
+      }
+    }
   }
-  if (Velocity_Y()>2.0){
-   Main_Thruster(0.0);
-  }
-  else
-  {
-   Main_Thruster(1.0);
-  }
- }
+  
 }
