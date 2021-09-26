@@ -439,7 +439,6 @@ void Safety_Override(void)
   not corresponding to the landing platform,
   carry out speed corrections using the thrusters
 **************************************************/
- printf("in safety override\n");
  double DistLimit;
  double Vmag;
  double dmin;
@@ -481,7 +480,6 @@ void Safety_Override(void)
  // what is it?
  if (dmin<DistLimit*fmax(.25,fmin(fabs(Velocity_X())/5.0,1)))
  { // Too close to a surface in the horizontal direction
-  printf("too close to surface in horizontal direction\n");
   if (LT_OK && RT_OK && MT_OK) {
     if (Angle()>1&&Angle()<359)
     {
@@ -499,7 +497,6 @@ void Safety_Override(void)
       Right_Thruster(0.0);
       }
   } else if (!LT_OK && !RT_OK && MT_OK) {
-    printf("here\n");
     if (Velocity_X()>0){
       Rotate_Left();
     } else {
@@ -525,7 +522,6 @@ void Safety_Override(void)
  }
  if (dmin<DistLimit)   // Too close to a surface in the vertical direction
  {
-   printf("too close to surface in vertical direction\n");
    if (MT_OK && RT_OK && LT_OK) {
     if (Angle()>1||Angle()>359)
       {
@@ -541,7 +537,6 @@ void Safety_Override(void)
       Main_Thruster(1.0);
       }
     } else if (MT_OK && !RT_OK && !LT_OK) {
-      printf("hereV\n");
       if (Velocity_Y()>2.0){
       Main_Thruster(0.0);
       }
