@@ -163,8 +163,9 @@
 
 #include "Lander_Control.h"
 
-void Rotate_Right(double VXlim);
-void Rotate_Left(double VXlim);
+void Rotate_Right();
+void Rotate_Left();
+void Rotate_Straight(double VXlim, double VYlim);
 
 void Lander_Control(void)
 {
@@ -336,27 +337,30 @@ if (MT_OK && RT_OK && LT_OK) {
 
   //right and left thrusters don't work
 } else if (!RT_OK && !LT_OK && MT_OK) {
-    if (Position_X()==PLAT_X) {
-      if (Angle()>1&&Angle()<359)
-      {
-        if (Angle()>=180) Rotate(360-Angle());
-        else Rotate(-Angle());
-        return;
-      }
-      if (Velocity_Y()<VYlim) Main_Thruster(1.0);
-      else Main_Thruster(0);
-      
+    VXlim = VXlim/4;
+    VYlim = VYlim/2;
+
+    if (Position_X()>PLAT_X-2 && Position_X()<PLAT_X+2) {
+      Rotate_Straight(VXlim, VYlim);
     } else if (Position_X()>PLAT_X) {
-      Rotate_Right(VXlim);
-      if (Velocity_Y()<VYlim) Main_Thruster(1.0);
-      else Main_Thruster(0);
-
+      Rotate_Left();
     } else {
-      Rotate_Left(VXlim);
-      if (Velocity_Y()<VYlim) Main_Thruster(1.0);
-      else Main_Thruster(0);
-
+      Rotate_Right();
     }
+
+    //horizontal velocity too fast to the right
+    if (Velocity_X()>=VXlim) {
+      Rotate_Left();
+    }
+    //horizontal velocity too fast to the left
+    else if (Velocity_X()<=-VXlim) {
+      Rotate_Right();
+    }
+    //vertical velocity adjustment
+    if (Velocity_Y()<VYlim) Main_Thruster(1.0);
+    else Main_Thruster(0);
+
+    
   //left and main thrusters don't work
 } else if (!LT_OK && !MT_OK && RT_OK) {
 
@@ -371,33 +375,39 @@ if (MT_OK && RT_OK && LT_OK) {
 }
 
 //rotate the ship right when left and right thrusters are not working
-void Rotate_Right(double VXlim) {
-  if (Angle()>0 && Angle()<344) {
-    if (Angle()<180) Rotate(-Angle()-15);
-    else Rotate(345-Angle());
+void Rotate_Left() {
+  if (Angle()>0 && Angle()<349) {
+    if (Angle()<180) Rotate(-Angle()-10);
+    else Rotate(350-Angle());
     return;
-  } else if (Angle()>346 && Angle()<360) {
-    Rotate(345-Angle());
+  } else if (Angle()>351 && Angle()<360) {
+    Rotate(350-Angle());
     return;
-  } else {
-    if (Velocity_X()<VXlim) Main_Thruster(1);
-    else Rotate_Left(VXlim);
   }
 }
 
 //rotate the ship left when left and right thrusters are not working
-void Rotate_Left(double VXlim) {
-  if (Angle()>16 && Angle()<360) {
-    if (Angle()<180) Rotate(-Angle()+15);
-    else Rotate(375-Angle());
+void Rotate_Right() {
+  if (Angle()>11 && Angle()<360) {
+    if (Angle()<180) Rotate(-Angle()+10);
+    else Rotate(370-Angle());
     return;
-  } else if (Angle()>0 && Angle()<14) {
-    Rotate(15-Angle());
+  } else if (Angle()>0 && Angle()<9) {
+    Rotate(10-Angle());
     return;
-  } else {
-    if (Velocity_X()<VXlim) Main_Thruster(1);
-    else Rotate_Right(VXlim);
   }
+}
+
+//rotate the ship back to straight and regulate the vertical velocity using the main thruster
+void Rotate_Straight(double VXlim, double VYlim) {
+  if (Angle()>1&&Angle()<359)
+  {
+    if (Angle()>=180) Rotate(360-Angle());
+    else Rotate(-Angle());
+    return;
+  }
+  if (Velocity_Y()<VYlim) Main_Thruster(1.0);
+  else Main_Thruster(0);
 }
 
 void Safety_Override(void)
@@ -478,15 +488,25 @@ void Safety_Override(void)
    return;
   }
 
-  if (Velocity_X()>0){
-   Right_Thruster(1.0);
-   Left_Thruster(0.0);
+  //changed this...not sure if correct
+  if (LT_OK && RT_OK && MT_OK) {
+    if (Velocity_X()>0){
+    Right_Thruster(1.0);
+    Left_Thruster(0.0);
+    }
+    else
+    {
+    Left_Thruster(1.0);
+    Right_Thruster(0.0);
+    }
+  } else if (!LT_OK && !RT_OK && MT_OK) {
+    if (Velocity_X()>0){
+      Rotate_Left();
+    } else {
+      Rotate_Right();
+    }
   }
-  else
-  {
-   Left_Thruster(1.0);
-   Right_Thruster(0.0);
-  }
+  
  }
 
  // Vertical direction

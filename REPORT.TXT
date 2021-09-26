@@ -3,16 +3,16 @@ CSCC85 - Fundamentals of Robotics and Automated Systems - UTSC
 Project 1 - Fault Tolerant Lander Control
 ______________________________________________________________________
 
-Team name:
+Team name: Team Astronauts
 
-Name 1 (last, first):
-Student number 1:
+Name 1 (last, first): Saqeeb, Nazmus
+Student number 1: 1006306007
 
-Name 2 (last, first):
-Student number 2:
+Name 2 (last, first): Zhao, Jiayu
+Student number 2: 1005343264
 
-Name 3 (last, first):
-Student number 3:
+Name 3 (last, first): N/A
+Student number 3: N/A
 
 (special: Lose 5 marks for not completing the above information)
 _______________________________________________________________________
