@@ -355,23 +355,6 @@ if (MT_OK && RT_OK && LT_OK) {
   VXlim = VXlim/4;
   VYlim = VYlim/2;
 
-  // static int a = 0;
-
-  // if ((Angle()<89 || Angle() > 358) && a == 0) {
-  //   printf("%d\n", a);
-  //   Rotate_Right(90);
-  //   return;
-  // } else {
-  //   printf("%f\n", Angle());
-  //   a = 1;
-  // }
-
-  // if (a == 1) {
-  //   printf("%d\n", a);
-  //   Rotate_Right(30);
-  //   return;
-  // }
-
   if (Position_Y()<PLAT_Y-30) {
     if (Position_X()>PLAT_X && Position_X()<PLAT_X+4) {
       Rotate_Right(90);
@@ -402,7 +385,7 @@ if (MT_OK && RT_OK && LT_OK) {
 
 }
 
-//rotate the ship left by angle angle
+//rotate the ship left to angle angle
 void Rotate_Left(int angle) {
   if (Angle()>0 && Angle()<360-angle-1) {
     if (Angle()<180) Rotate(-Angle()-angle);
@@ -414,7 +397,7 @@ void Rotate_Left(int angle) {
   }
 }
 
-//rotate the ship right by angle angle
+//rotate the ship right to angle angle
 void Rotate_Right(int angle) {
   if (Angle()>angle+1 && Angle()<360) {
     if (Angle()<180) Rotate(-Angle()+angle);
