@@ -163,8 +163,8 @@
 
 #include "Lander_Control.h"
 
-void Rotate_Right();
-void Rotate_Left();
+void Rotate_Right(int angle);
+void Rotate_Left(int angle);
 void Rotate_Straight(double VXlim, double VYlim);
 
 void Lander_Control(void)
@@ -292,108 +292,63 @@ if (MT_OK && RT_OK && LT_OK) {
  if (Velocity_Y()<VYlim) Main_Thruster(1.0);
  else Main_Thruster(0);
 
- //main thruster does not work
-} else if (!MT_OK && LT_OK && RT_OK) {
-  // if (Position_X()==PLAT_X) {
-  //   if (Velocity_Y()<VYlim) {
-  //     Left_Thruster(1.0);
-  //     Right_Thruster(1.0);
-  //   } else {
-  //     Left_Thruster(0);
-  //     Right_Thruster(0);
-  //   }
-  // } else if (Position_X()>PLAT_X){
-  //   double left_value_baseline = 0.5;
-  //   double right_value_baseline = 0.5;
-  //   Left_Thruster(left_value_baseline);
-  //   if (Velocity_X()>(-VXlim)) Right_Thruster((VXlim+fmin(0,Velocity_X()))/VXlim);
-  //   else {
-  //     Right_Thruster(right_value_baseline);
-  //     Left_Thruster(fabs(VXlim-Velocity_X()));
-  //   }
-  // } else {
-  //   double right_value_baseline = 0.5;
-  //   double left_value_baseline = 0.5;
-  //   Right_Thruster(right_value_baseline);
-  //   if (Velocity_X()<VXlim) Left_Thruster((VXlim-fmax(0,Velocity_X()))/VXlim);
-  //   else {
-  //     Left_Thruster(left_value_baseline);
-  //     Right_Thruster(fabs(VXlim-Velocity_X()));
-  //   }
-  // }
-
-  // if (Velocity_Y()<VYlim) {
-  //   Right_Thruster(1.0);
-  //   Left_Thruster(1.0);
-  // }
-  
-
-
-  //left thruster does not work
-} else if (!LT_OK && MT_OK && RT_OK) {
-
-  //right thruster does not work
-} else if (!RT_OK && MT_OK && LT_OK) {
-
   //right and left thrusters don't work
-} else if (!RT_OK && !LT_OK && MT_OK) {
+} else if (MT_OK) {
     VXlim = VXlim/4;
     VYlim = VYlim/2;
 
     if (Position_X()>PLAT_X-2 && Position_X()<PLAT_X+2) {
       Rotate_Straight(VXlim, VYlim);
     } else if (Position_X()>PLAT_X) {
-      Rotate_Left();
+      Rotate_Left(10);
     } else {
-      Rotate_Right();
+      Rotate_Right(10);
     }
 
     //horizontal velocity too fast to the right
     if (Velocity_X()>=VXlim) {
-      Rotate_Left();
+      Rotate_Left(10);
     }
     //horizontal velocity too fast to the left
     else if (Velocity_X()<=-VXlim) {
-      Rotate_Right();
+      Rotate_Right(10);
     }
     //vertical velocity adjustment
     if (Velocity_Y()<VYlim) Main_Thruster(1.0);
     else Main_Thruster(0);
 
     
-  //left and main thrusters don't work
-} else if (!LT_OK && !MT_OK && RT_OK) {
-
   //right and main thrusters don't work
-} else if (!RT_OK && MT_OK && LT_OK) {
-
-  //none of the thrusters work
-} else {
+} else if (LT_OK) {
+  //TODO
+  //left and main thrusters don't work
+} else if (RT_OK) {
+  //TODO
 
 }
 
 }
 
-//rotate the ship right when left and right thrusters are not working
-void Rotate_Left() {
-  if (Angle()>0 && Angle()<349) {
-    if (Angle()<180) Rotate(-Angle()-10);
-    else Rotate(350-Angle());
+//rotate the ship right by angle angle
+void Rotate_Left(int angle) {
+  if (Angle()>0 && Angle()<360-angle-1) {
+    if (Angle()<180) Rotate(-Angle()-angle);
+    else Rotate(360-Angle()-angle);
     return;
-  } else if (Angle()>351 && Angle()<360) {
-    Rotate(350-Angle());
+  } else if (Angle()>360-angle+1 && Angle()<360) {
+    Rotate(360-angle-Angle());
     return;
   }
 }
 
-//rotate the ship left when left and right thrusters are not working
-void Rotate_Right() {
-  if (Angle()>11 && Angle()<360) {
-    if (Angle()<180) Rotate(-Angle()+10);
-    else Rotate(370-Angle());
+//rotate the ship left by angle angle
+void Rotate_Right(int angle) {
+  if (Angle()>angle+1 && Angle()<360) {
+    if (Angle()<180) Rotate(-Angle()+angle);
+    else Rotate(360+angle-Angle());
     return;
-  } else if (Angle()>0 && Angle()<9) {
-    Rotate(10-Angle());
+  } else if (Angle()>0 && Angle()<angle-1) {
+    Rotate(angle-Angle());
     return;
   }
 }
@@ -498,9 +453,9 @@ void Safety_Override(void)
       }
   } else if (!LT_OK && !RT_OK && MT_OK) {
     if (Velocity_X()>0){
-      Rotate_Left();
+      Rotate_Left(10);
     } else {
-      Rotate_Right();
+      Rotate_Right(10);
     }
   }
   
