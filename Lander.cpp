@@ -522,11 +522,23 @@ void Safety_Override(void)
       Left_Thruster(1.0);
       Right_Thruster(0.0);
       }
-  } else if (!LT_OK && !RT_OK && MT_OK) {
+  } else if (MT_OK) {
     if (Velocity_X()>0){
       Rotate_Left(10);
     } else {
       Rotate_Right(10);
+    }
+  } else if (LT_OK) {
+    if (Velocity_X()>0){
+      Rotate_Left(100);
+    } else {
+      Rotate_Left(80);
+    }
+  } else if (RT_OK) {
+    if (Velocity_X()>0){
+      Rotate_Right(80);
+    } else {
+      Rotate_Right(100);
     }
   }
   
@@ -562,13 +574,29 @@ void Safety_Override(void)
       {
       Main_Thruster(1.0);
       }
-    } else if (MT_OK && !RT_OK && !LT_OK) {
+    } else if (MT_OK) {
       if (Velocity_Y()>2.0){
       Main_Thruster(0.0);
       }
       else
       {
       Main_Thruster(1.0);
+      }
+    } else if (LT_OK) {
+      if (Velocity_Y()>2.0){
+      Left_Thruster(0.0);
+      }
+      else
+      {
+      Left_Thruster(1.0);
+      }
+    } else if (RT_OK) {
+      if (Velocity_Y()>2.0){
+      Right_Thruster(0.0);
+      }
+      else
+      {
+      Right_Thruster(1.0);
       }
     }
   }
