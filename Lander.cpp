@@ -165,7 +165,7 @@
 
 void Rotate_Right(int angle);
 void Rotate_Left(int angle);
-void Rotate_Straight(double VXlim, double VYlim);
+void Rotate_Straight();
 
 void Lander_Control(void)
 {
@@ -298,7 +298,7 @@ if (MT_OK && RT_OK && LT_OK) {
     VYlim = VYlim/2;
 
     if (Position_X()>PLAT_X-2 && Position_X()<PLAT_X+2) {
-      Rotate_Straight(VXlim, VYlim);
+      Rotate_Straight();
     } else if (Position_X()>PLAT_X) {
       Rotate_Left(10);
     } else {
@@ -322,14 +322,87 @@ if (MT_OK && RT_OK && LT_OK) {
 } else if (LT_OK) {
   //TODO
   //left and main thrusters don't work
+  VXlim = VXlim/4;
+  VYlim = VYlim/2;
+
+  if (Position_Y()<PLAT_Y-30) {
+    if (Position_X()>PLAT_X-4 && Position_X()<PLAT_X) {
+      Rotate_Left(90);
+    } else if (Position_X()>PLAT_X) {
+      Rotate_Left(100);
+    } else {
+      Rotate_Left(80);
+    }
+
+    //horizontal velocity too fast to the right
+    if (Velocity_X()>=VXlim) {
+      Rotate_Left(100);
+    }
+    //horizontal velocity too fast to the left
+    else if (Velocity_X()<=-VXlim) {
+      Rotate_Left(80);
+    }
+    //vertical velocity adjustment
+    if (Velocity_Y()<VYlim) Left_Thruster(1.0);
+    else Left_Thruster(0);
+
+  } else {
+    Left_Thruster(0);
+    Rotate_Straight();
+  }
+
 } else if (RT_OK) {
-  //TODO
+  VXlim = VXlim/4;
+  VYlim = VYlim/2;
+
+  // static int a = 0;
+
+  // if ((Angle()<89 || Angle() > 358) && a == 0) {
+  //   printf("%d\n", a);
+  //   Rotate_Right(90);
+  //   return;
+  // } else {
+  //   printf("%f\n", Angle());
+  //   a = 1;
+  // }
+
+  // if (a == 1) {
+  //   printf("%d\n", a);
+  //   Rotate_Right(30);
+  //   return;
+  // }
+
+  if (Position_Y()<PLAT_Y-30) {
+    if (Position_X()>PLAT_X && Position_X()<PLAT_X+4) {
+      Rotate_Right(90);
+    } else if (Position_X()>PLAT_X) {
+      Rotate_Right(80);
+    } else {
+      Rotate_Right(100);
+    }
+
+    //horizontal velocity too fast to the right
+    if (Velocity_X()>=VXlim) {
+      Rotate_Right(80);
+    }
+    //horizontal velocity too fast to the left
+    else if (Velocity_X()<=-VXlim) {
+      Rotate_Right(100);
+    }
+    //vertical velocity adjustment
+    if (Velocity_Y()<VYlim) Right_Thruster(1.0);
+    else Right_Thruster(0);
+
+  } else {
+    Right_Thruster(0);
+    Rotate_Straight();
+  }
 
 }
 
 }
 
-//rotate the ship right by angle angle
+//rotate the ship left by angle angle
 void Rotate_Left(int angle) {
   if (Angle()>0 && Angle()<360-angle-1) {
     if (Angle()<180) Rotate(-Angle()-angle);
@@ -341,7 +414,7 @@ void Rotate_Left(int angle) {
   }
 }
 
-//rotate the ship left by angle angle
+//rotate the ship right by angle angle
 void Rotate_Right(int angle) {
   if (Angle()>angle+1 && Angle()<360) {
     if (Angle()<180) Rotate(-Angle()+angle);
@@ -353,16 +426,14 @@ void Rotate_Right(int angle) {
   }
 }
 
-//rotate the ship back to straight and regulate the vertical velocity using the main thruster
-void Rotate_Straight(double VXlim, double VYlim) {
+//rotate the ship back to straight
+void Rotate_Straight() {
   if (Angle()>1&&Angle()<359)
   {
     if (Angle()>=180) Rotate(360-Angle());
     else Rotate(-Angle());
     return;
   }
-  if (Velocity_Y()<VYlim) Main_Thruster(1.0);
-  else Main_Thruster(0);
 }
 
 void Safety_Override(void)
