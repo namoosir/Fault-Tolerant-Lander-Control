@@ -133,7 +133,7 @@
                                5 - Vertical velocity sensor
                                6 - Horizontal position sensor
                                7 - Vertical position sensor
-                               8 - Angle sensor
+                               8 - Angle  
                                9 - Sonar
 
         e.g.
@@ -163,9 +163,10 @@
 
 #include "Lander_Control.h"
 
-void Rotate_Right(int angle);
-void Rotate_Left(int angle);
-void Rotate_Straight();
+// void Rotate_Right(int angle);
+// void Rotate_Left(int angle);
+// void Rotate_Straight();
+void Rotate_To(int angle);
 
 void Lander_Control(void)
 {
@@ -250,7 +251,8 @@ void Lander_Control(void)
  // effect, i.e. the rotation angle does not accumulate
  // for successive calls.
 
- 
+//  printf("%f\n", Position_X());
+//  printf("%f\n", Angle());
 //all thrusters work
 if (MT_OK && RT_OK && LT_OK) {
   if (Angle()>1&&Angle()<359)
@@ -294,24 +296,31 @@ if (MT_OK && RT_OK && LT_OK) {
 
   //right and left thrusters don't work
 } else if (MT_OK) {
-    VXlim = VXlim/4;
+    Right_Thruster(0);
+    Left_Thruster(0);
+
+    if(fabs(Position_Y()-PLAT_Y)>100){
+      VXlim = VXlim/4;
+    }else{
+      VXlim = VXlim/2;
+    }
     VYlim = VYlim/2;
 
     if (Position_X()>PLAT_X-2 && Position_X()<PLAT_X+2) {
-      Rotate_Straight();
+      Rotate_To(0);
     } else if (Position_X()>PLAT_X) {
-      Rotate_Left(10);
+      Rotate_To(350);
     } else {
-      Rotate_Right(10);
+      Rotate_To(10);
     }
 
     //horizontal velocity too fast to the right
     if (Velocity_X()>=VXlim) {
-      Rotate_Left(10);
+      Rotate_To(350);
     }
     //horizontal velocity too fast to the left
     else if (Velocity_X()<=-VXlim) {
-      Rotate_Right(10);
+      Rotate_To(10);
     }
     //vertical velocity adjustment
     if (Velocity_Y()<VYlim) Main_Thruster(1.0);
@@ -320,27 +329,27 @@ if (MT_OK && RT_OK && LT_OK) {
     
   //right and main thrusters don't work
 } else if (LT_OK) {
-  //TODO
-  //left and main thrusters don't work
+  Main_Thruster(0);
+  Right_Thruster(0);
   VXlim = VXlim/4;
   VYlim = VYlim/2;
 
-  if (Position_Y()<PLAT_Y-30) {
+  if (Position_Y()<PLAT_Y-50) {
     if (Position_X()>PLAT_X-4 && Position_X()<PLAT_X) {
-      Rotate_Left(90);
+      Rotate_To(270);
     } else if (Position_X()>PLAT_X) {
-      Rotate_Left(100);
+      Rotate_To(260);
     } else {
-      Rotate_Left(80);
+      Rotate_To(280);
     }
 
     //horizontal velocity too fast to the right
     if (Velocity_X()>=VXlim) {
-      Rotate_Left(100);
+      Rotate_To(260);
     }
     //horizontal velocity too fast to the left
     else if (Velocity_X()<=-VXlim) {
-      Rotate_Left(80);
+      Rotate_To(280);
     }
     //vertical velocity adjustment
     if (Velocity_Y()<VYlim) Left_Thruster(1.0);
@@ -348,29 +357,34 @@ if (MT_OK && RT_OK && LT_OK) {
 
   } else {
     Left_Thruster(0);
-    Rotate_Straight();
+    Rotate_To(0);
   }
-
+//right thruster working
 } else if (RT_OK) {
+  Main_Thruster(0);
+  Left_Thruster(0);
+
   VXlim = VXlim/4;
   VYlim = VYlim/2;
 
-  if (Position_Y()<PLAT_Y-30) {
+
+
+  if (Position_Y()<PLAT_Y-50) {
     if (Position_X()>PLAT_X && Position_X()<PLAT_X+4) {
-      Rotate_Right(90);
+      Rotate_To(90);
     } else if (Position_X()>PLAT_X) {
-      Rotate_Right(80);
+      Rotate_To(80);
     } else {
-      Rotate_Right(100);
+      Rotate_To(100);
     }
 
     //horizontal velocity too fast to the right
     if (Velocity_X()>=VXlim) {
-      Rotate_Right(80);
+      Rotate_To(80);
     }
     //horizontal velocity too fast to the left
     else if (Velocity_X()<=-VXlim) {
-      Rotate_Right(100);
+      Rotate_To(100);
     }
     //vertical velocity adjustment
     if (Velocity_Y()<VYlim) Right_Thruster(1.0);
@@ -378,44 +392,31 @@ if (MT_OK && RT_OK && LT_OK) {
 
   } else {
     Right_Thruster(0);
-    Rotate_Straight();
+    Rotate_To(0);
   }
 
 }
 
 }
 
-//rotate the ship left to angle angle
-void Rotate_Left(int angle) {
-  if (Angle()>0 && Angle()<360-angle-1) {
-    if (Angle()<180) Rotate(-Angle()-angle);
-    else Rotate(360-Angle()-angle);
-    return;
-  } else if (Angle()>360-angle+1 && Angle()<360) {
-    Rotate(360-angle-Angle());
+void Rotate_To(int angle) {
+  if (fabs(angle-Angle()) < 2) {
     return;
   }
-}
 
-//rotate the ship right to angle angle
-void Rotate_Right(int angle) {
-  if (Angle()>angle+1 && Angle()<360) {
-    if (Angle()<180) Rotate(-Angle()+angle);
-    else Rotate(360+angle-Angle());
-    return;
-  } else if (Angle()>0 && Angle()<angle-1) {
-    Rotate(angle-Angle());
-    return;
+  double cAngle;
+  if (angle - Angle() > 180) {
+    cAngle = Angle()+360;
+  }else if (Angle() - angle > 180) {
+    angle+=360;
   }
-}
-
-//rotate the ship back to straight
-void Rotate_Straight() {
-  if (Angle()>1&&Angle()<359)
-  {
-    if (Angle()>=180) Rotate(360-Angle());
-    else Rotate(-Angle());
-    return;
+  else{
+    cAngle = Angle();
+  }
+  if (cAngle > angle) {
+    Rotate(-1);
+  } else {
+    Rotate(1);
   }
 }
 
@@ -507,21 +508,21 @@ void Safety_Override(void)
       }
   } else if (MT_OK) {
     if (Velocity_X()>0){
-      Rotate_Left(10);
+      Rotate_To(350);
     } else {
-      Rotate_Right(10);
+      Rotate_To(10);
     }
   } else if (LT_OK) {
     if (Velocity_X()>0){
-      Rotate_Left(100);
+      Rotate_To(260);
     } else {
-      Rotate_Left(80);
+      Rotate_To(280);
     }
   } else if (RT_OK) {
     if (Velocity_X()>0){
-      Rotate_Right(80);
+      Rotate_To(80);
     } else {
-      Rotate_Right(100);
+      Rotate_To(100);
     }
   }
   
@@ -543,20 +544,20 @@ void Safety_Override(void)
  }
  if (dmin<DistLimit)   // Too close to a surface in the vertical direction
  {
-   if (MT_OK && RT_OK && LT_OK) {
+   if (MT_OK && RT_OK && LT_OK) {     
     if (Angle()>1||Angle()>359)
       {
-      if (Angle()>=180) Rotate(360-Angle());
-      else Rotate(-Angle());
-      return;
+        if (Angle()>=180) Rotate(360-Angle());
+        else Rotate(-Angle());
+        return;
       }
-      if (Velocity_Y()>2.0){
-      Main_Thruster(0.0);
-      }
-      else
-      {
-      Main_Thruster(1.0);
-      }
+        if (Velocity_Y()>2.0){
+          Main_Thruster(0.0);
+        }
+        else
+        {
+          Main_Thruster(1.0);
+        }
     } else if (MT_OK) {
       if (Velocity_Y()>2.0){
       Main_Thruster(0.0);
@@ -581,7 +582,7 @@ void Safety_Override(void)
       {
       Right_Thruster(1.0);
       }
-    }
-  }
+    } 
+  } 
   
 }
