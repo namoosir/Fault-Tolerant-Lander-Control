@@ -159,14 +159,13 @@
   Standard C libraries
 */
 #include <math.h>
-#include<stdio.h>
+#include <stdio.h>
+#include <algorithm>
 
 #include "Lander_Control.h"
 
-// void Rotate_Right(int angle);
-// void Rotate_Left(int angle);
-// void Rotate_Straight();
 void Rotate_To(int angle);
+double Robust_Angle(void);
 
 void Lander_Control(void)
 {
@@ -255,10 +254,10 @@ void Lander_Control(void)
 //  printf("%f\n", Angle());
 //all thrusters work
 if (MT_OK && RT_OK && LT_OK) {
-  if (Angle()>1&&Angle()<359)
+  if (Robust_Angle()>1&&Robust_Angle()<359)
  {
-  if (Angle()>=180) Rotate(360-Angle());
-  else Rotate(-Angle());
+  if (Robust_Angle()>=180) Rotate(360-Robust_Angle());
+  else Rotate(-Robust_Angle());
   return;
  }
  // Module is oriented properly, check for horizontal position
@@ -396,28 +395,45 @@ if (MT_OK && RT_OK && LT_OK) {
   }
 
 }
-
+  printf("actual angle = %f, filtered angle = %f\n", Angle(), Robust_Angle());
 }
 
+//Rotate to angle in the quickest direction
 void Rotate_To(int angle) {
-  if (fabs(angle-Angle()) < 2) {
+  if (fabs(angle-Robust_Angle()) < 2) {
     return;
   }
 
   double cAngle;
-  if (angle - Angle() > 180) {
-    cAngle = Angle()+360;
-  }else if (Angle() - angle > 180) {
+  if (angle - Robust_Angle() > 180) {
+    cAngle = Robust_Angle()+360;
+  }else if (Robust_Angle() - angle > 180) {
     angle+=360;
   }
   else{
-    cAngle = Angle();
+    cAngle = Robust_Angle();
   }
   if (cAngle > angle) {
     Rotate(-1);
   } else {
     Rotate(1);
   }
+}
+
+double Robust_Angle(void) {
+  int size = 2000;
+  // double array[size];
+  double sum = 0;
+
+  // for (int i = 0; i < size; i++) {
+  //   array[i] = Angle();
+  // }
+
+  for (int i = 0; i < size; i++) {
+    sum += Angle();
+  }
+
+  return sum/size;
 }
 
 void Safety_Override(void)
@@ -491,10 +507,10 @@ void Safety_Override(void)
  if (dmin<DistLimit*fmax(.25,fmin(fabs(Velocity_X())/5.0,1)))
  { // Too close to a surface in the horizontal direction
   if (LT_OK && RT_OK && MT_OK) {
-    if (Angle()>1&&Angle()<359)
+    if (Robust_Angle()>1&&Robust_Angle()<359)
     {
-    if (Angle()>=180) Rotate(360-Angle());
-    else Rotate(-Angle());
+    if (Robust_Angle()>=180) Rotate(360-Robust_Angle());
+    else Rotate(-Robust_Angle());
     return;
     }
       if (Velocity_X()>0){
@@ -545,10 +561,10 @@ void Safety_Override(void)
  if (dmin<DistLimit)   // Too close to a surface in the vertical direction
  {
    if (MT_OK && RT_OK && LT_OK) {     
-    if (Angle()>1||Angle()>359)
+    if (Robust_Angle()>1||Robust_Angle()>359)
       {
-        if (Angle()>=180) Rotate(360-Angle());
-        else Rotate(-Angle());
+        if (Robust_Angle()>=180) Rotate(360-Robust_Angle());
+        else Rotate(-Robust_Angle());
         return;
       }
         if (Velocity_Y()>2.0){
