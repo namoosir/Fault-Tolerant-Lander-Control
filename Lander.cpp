@@ -164,8 +164,16 @@
 
 #include "Lander_Control.h"
 
+double ANGLE = 0;
+double X [10];
+double Y [10];
+double VX [10];
+double VY [10];
 void Rotate_To(int angle);
 double Robust_Angle(void);
+double var(double*, int);
+void Update_Double_Array(double, double*, int);
+void Print_Double_Array(double*, int);
 
 void Lander_Control(void)
 {
@@ -253,6 +261,11 @@ void Lander_Control(void)
 //  printf("%f\n", Position_X());
 //  printf("%f\n", Angle());
 //all thrusters work
+ Update_Double_Array(Position_X(), X, 10);
+ Update_Double_Array(Position_Y(), Y, 10);
+ Update_Double_Array(Velocity_X(), VX, 10);
+ Update_Double_Array(Velocity_Y(), VY, 10);
+ //Print_Double_Array(VY, 10);
 if (MT_OK && RT_OK && LT_OK) {
   if (Robust_Angle()>1&&Robust_Angle()<359)
  {
@@ -395,7 +408,7 @@ if (MT_OK && RT_OK && LT_OK) {
   }
 
 }
-  printf("actual angle = %f, filtered angle = %f\n", Angle(), Robust_Angle());
+  // printf("actual angle = %f, filtered angle = %f\n", Angle(), Robust_Angle());
 }
 
 //Rotate to angle in the quickest direction
@@ -434,6 +447,46 @@ double Robust_Angle(void) {
   }
 
   return sum/size;
+}
+
+void Print_Double_Array(double *array, int size){
+  for (int i = 0; i < size; i++)
+  {
+    printf("%f ", array[i]);
+  }
+  printf("v: %f\n", var(array, size));
+}
+
+void Update_Double_Array(double value, double *array, int size){
+  for (int i = 0; i < size; i++)
+  {
+    if(array[i]==0){
+      array[i] = value;
+      return;
+    }
+  }
+  for (int i = size-2; i >= 0; i--)
+  {
+    array[i+1] = array[i];
+  }
+  array[0] = value;
+}
+
+double var(double *array, int size){
+  //2 for VX, VY
+  //1000 for X, Y
+  double sum = 0;
+  for (int i = 0; i < size; i++)
+  {
+    sum += array[i];
+  }
+  double avg = sum/size;
+  double var = 0;
+  for (int i = 0; i < size; i++)
+  {
+    var += (array[i]-avg) * (array[i]-avg);
+  }
+  return var/size;
 }
 
 void Safety_Override(void)
