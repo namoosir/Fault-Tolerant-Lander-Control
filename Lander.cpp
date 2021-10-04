@@ -285,7 +285,7 @@ void Lander_Control(void)
  Update_Double_Array(Robust_Y(), Y, 10);
  Update_Double_Array(Robust_VX(), VX, 10);
  Update_Double_Array(Robust_VY(), VY, 10);
-  // printf("%f %f %f\n", Robust_X(), Position_X(), Position_X()-Robust_X());
+  printf("%f %f %f\n", Robust_Y(), Position_Y(), Position_Y()-Robust_Y());
 //  Print_Double_Array(X, 10);
 // if (MT_OK && RT_OK && LT_OK) {
 //   if (Robust_Angle()>1&&Robust_Angle()<359)
@@ -345,8 +345,14 @@ void Lander_Control(void)
         Rotate_To(0);
       } else if (Robust_X()>PLAT_X) {
         Rotate_To(350);
+        if(fabs(Robust_X()-PLAT_X)>100){
+          Rotate_To(315);
+        }
       } else {
         Rotate_To(10);
+        if(fabs(Robust_X()-PLAT_X)>100){
+          Rotate_To(45);
+        }
       }
 
       //horizontal velocity too fast to the right
@@ -527,13 +533,42 @@ double Robust_X(void) {
 }
 
 double Robust_Y(void) {
-  int size = 2000;
-  double sum = 0;
-  for (int i = 0; i < size; i++) {
-    sum += Position_Y();
+  double sample [10];
+  for (int i = 0; i < 10; i++) {
+    sample[i] = Position_Y();
+  }
+  
+  if(var(sample, 10) > 1000){
+    Y_OK = 0;
+  }else{
+    Y_OK = 1;
   }
 
-  return sum/size;
+  if(Y_OK){
+    int size = 2000;
+    double sum = 0;
+    for (int i = 0; i < size; i++) {
+      sum += Position_Y();
+    }
+    printf("act\n");
+    return sum/size;
+  }
+  if(fabs(Robust_X()-PLAT_X)<120){
+    printf("fix\n");
+    return 70;
+  }else{
+    printf("fix\n");
+    if(rand()>0.35*RAND_MAX){
+      return 85;
+    }
+    return 70;
+  }
+  if(VY_OK){
+    printf("est\n");
+    return (Robust_VY()+Y[1]);
+  }
+  return 70;
+  
 }
 
 double Robust_VX(void) {
@@ -677,7 +712,7 @@ void Safety_Override(void)
  // safety override (close to the landing platform
  // the Control_Policy() should be trusted to
  // safely land the craft)
- if (fabs(PLAT_X-Robust_X())>50 && Robust_Y()>80){
+ if (fabs(PLAT_X-Robust_X())>80 && Robust_Y()>80){
    if (MT_OK) {
       // if (Robust_VX()>0){
       //   Rotate_To(340);
