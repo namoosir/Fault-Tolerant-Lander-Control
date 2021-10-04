@@ -285,7 +285,7 @@ void Lander_Control(void)
  Update_Double_Array(Robust_Y(), Y, 10);
  Update_Double_Array(Robust_VX(), VX, 10);
  Update_Double_Array(Robust_VY(), VY, 10);
-  printf("%f %f %f\n", Robust_Y(), Position_Y(), Position_Y()-Robust_Y());
+  // printf("%f %f %f\n", Robust_Y(), Position_Y(), Position_Y()-Robust_Y());
 //  Print_Double_Array(X, 10);
 // if (MT_OK && RT_OK && LT_OK) {
 //   if (Robust_Angle()>1&&Robust_Angle()<359)
@@ -550,21 +550,17 @@ double Robust_Y(void) {
     for (int i = 0; i < size; i++) {
       sum += Position_Y();
     }
-    printf("act\n");
     return sum/size;
   }
   if(fabs(Robust_X()-PLAT_X)<120){
-    printf("fix\n");
     return 70;
   }else{
-    printf("fix\n");
     if(rand()>0.35*RAND_MAX){
       return 85;
     }
     return 70;
   }
   if(VY_OK){
-    printf("est\n");
     return (Robust_VY()+Y[1]);
   }
   return 70;
