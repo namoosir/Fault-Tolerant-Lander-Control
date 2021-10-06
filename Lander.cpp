@@ -526,7 +526,7 @@ double Robust_X(void) {
     return sum/size;
   }
   if(VX_OK){
-    return (Robust_VX()+X[1]);
+    return (Robust_VX()/20+X[1]);
   }
   return (Robust_VX()+X[1]);
   
